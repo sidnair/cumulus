@@ -9,30 +9,21 @@ function uploadImage {
 
 function error {
   notify-send "Cumulus Error" "$1" -t 5000 --icon=dialog-error
+  exit 1
 }
 
 if [ ! -e "$HOME/.cumulusrc" ]
 then
   error "Invalid ~/.cumulusrc. Please create one with your imgur client id."
-  exit 1
 fi
 
 
 mkdir -p ~/.cumulus
-cd ~/.cumulus
+(cd ~/.cumulus && scrot -s) || error 'Failed to take screenshot'
 
-scrot -s
-
-if [ $? -ne 0 ]; then
-  error 'Failed to take screenshot'
-  exit 1
-fi
-
-IMG=$(ls -t *.png | head -n 1)
-ABSOLUTE_IMG_PATH=`realpath $IMG`
+IMG=$(ls -t ~/.cumulus/*.png | head -n 1)
 URL=`uploadImage $IMG`
 echo $URL | xclip
-notify-send "$IMG" "$URL copied to clipboard" -t 3000 --icon=$ABSOLUTE_IMG_PATH
+notify-send "$IMG" "$URL copied to clipboard" -t 3000 --icon=$IMG
 
-cd - > /dev/null
 exit 0
