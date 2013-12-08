@@ -27,4 +27,4 @@ This isn't really designed to be portable, so YMMV.
 - ~/.cumulusrc file with an imgur client id
 - scrot
 - notify-send
-- xclip
+- xsel

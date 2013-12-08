@@ -19,7 +19,7 @@ mkdir -p ~/.cumulus || error "Can't initialize '~/.cumulus directory'"
 
 IMG=$(ls -t ~/.cumulus/*.png | head -n 1)
 URL=`uploadImage $IMG`
-echo $URL | xclip
+echo $URL | xsel -i -b
 notify-send "$IMG" "$URL copied to clipboard" -t 3000 --icon=$IMG
 
 exit 0
