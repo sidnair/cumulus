@@ -17,6 +17,7 @@ clipboard.
 Run the cumulus.sh script directly, or bind it to a hotkey (e.g. as a KDE custom
 shortcut).
 
+`make install` puts `cumulus` in your path.
 
 # Requirements
 This isn't really designed to be portable, so YMMV.
