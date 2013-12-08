@@ -12,13 +12,9 @@ function error {
   exit 1
 }
 
-if [ ! -e "$HOME/.cumulusrc" ]
-then
-  error "Invalid ~/.cumulusrc. Please create one with your imgur client id."
-fi
+[ -e "$HOME/.cumulusrc" ] || error "Invalid ~/.cumulusrc. Please create one with your imgur client id."
 
-
-mkdir -p ~/.cumulus
+mkdir -p ~/.cumulus || error "Can't initialize '~/.cumulus directory'"
 (cd ~/.cumulus && scrot -s) || error 'Failed to take screenshot'
 
 IMG=$(ls -t ~/.cumulus/*.png | head -n 1)
