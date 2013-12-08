@@ -12,6 +12,8 @@ will be saved in ~/.cumulus (if you want to retrieve it later), and a
 notification will appear once the image is uploaded and copied to your
 clipboard.
 
+If you're running into issues, run the script from the command line and see if
+there's any suspicious output.
 
 # Installation
 Run the cumulus.sh script directly, or bind it to a hotkey (e.g. as a KDE custom
