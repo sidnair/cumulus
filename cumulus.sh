@@ -10,7 +10,7 @@ skip_screenshot=false
 # Primitives
 ####################
 
-isMac() {
+is_mac() {
   uname | grep -q "Darwin"
 }
 
@@ -19,8 +19,8 @@ isMac() {
 # 2) message
 # 3) url to open on click (optional, ignored on Linux)
 # 4) icon url (optional)
-displayNotification() {
-  if isMac; then
+display_notification() {
+  if is_mac; then
     terminal-notifier -message "$2" -title "$1" -open "$3" -contentImage "$4" -sound Glass
   else
     notify-send $1 $2 -t 3000 --icon=$4
@@ -31,13 +31,13 @@ displayNotification() {
 
 # Display error message an exit
 error() {
-  displayNotification "Cumulus Error" "$1"
+  display_notification "Cumulus Error" "$1"
   exit 1
 }
 
 # Take an interactive screenshot and put it in ~/.cumulus
-takeScreenshot() {
-  if isMac; then
+take_screenshot() {
+  if is_mac; then
     screencapture -i ~/.cumulus/screen-$(date +"%m-%d-%Y-%H:%M:%S").png
   else
     (cd ~/.cumulus && scrot -s)
@@ -46,7 +46,7 @@ takeScreenshot() {
 
 # Pipe text to this function to copy it to the clipboard
 clipboard() {
-  if isMac; then
+  if is_mac; then
     pbcopy
   else
     xsel -i -b
@@ -54,7 +54,7 @@ clipboard() {
 }
 
 # Upload the specified image path to imgur and print out the path of the image.
-uploadImage() {
+upload_image() {
   ID=$(cat ~/.cumulusrc | tr -d '\n')
 
   if ! $skip_upload; then
@@ -65,37 +65,37 @@ uploadImage() {
   cat ~/.cumulus/.imgur-response | grep -o -P '"http.*?\"' | tr -d '\\"'
 }
 
-lastScreenshot() {
+last_screenshot() {
   ls -t ~/.cumulus/*.png | head -n 1
 }
 
 ####################
 # Main functions
 ####################
-openLastScreenshot() {
-  if isMac; then
-    open `lastScreenshot`
+open_last_screenshot() {
+  if is_mac; then
+    open `last_screenshot`
   else
-    xdg-open `lastScreenshot`
+    xdg-open `last_screenshot`
   fi
 }
 
-getLastUrl() {
+get_last_url() {
   last_url=`cat ~/.cumulus/.last-url`
   echo $last_url | tee /dev/tty | clipboard
 }
 
-doUploadAndCopy() {
+cumulus_main() {
   if ! $skip_screenshot; then
-    takeScreenshot || error 'Failed to take screenshot'
+    take_screenshot || error 'Failed to take screenshot'
   fi
 
   # Grab the most recent screenshot in ~/.cumulus
-  img=`lastScreenshot`
-  url=`uploadImage $img`
+  img=`last_screenshot`
+  url=`upload_image $img`
   echo $url | clipboard
   echo $url > ~/.cumulus/.last-url
-  displayNotification "$img" "$url copied to clipboard" $url $img
+  display_notification "$img" "$url copied to clipboard" $url $img
 }
 
 ####################
@@ -108,11 +108,11 @@ mkdir -p ~/.cumulus || error "Can't initialize '~/.cumulus directory'"
 while [ $# != 0 ]; do
   case "$1" in
     --open-last)
-      openLastScreenshot
+      open_last_screenshot
       exit 0
       ;;
     --get-last-url)
-      getLastUrl
+      get_last_url
       exit 0
       ;;
     --skip-screenshot)
@@ -128,6 +128,6 @@ while [ $# != 0 ]; do
   esac
 done
 
-doUploadAndCopy
+cumulus_main
 
 exit 0
