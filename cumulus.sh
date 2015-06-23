@@ -15,7 +15,7 @@ isMac() {
 # 4) icon url (optional)
 displayNotification() {
   if isMac; then
-    terminal-notifier -message $2 -title $1 -open $3 -contentImage $4 -sound Glass
+    terminal-notifier -message "$2" -title "$1" -open "$3" -contentImage "$4" -sound Glass
   else
     notify-send $1 $2 -t 3000 --icon=$4
     # notify-send "Cumulus Error" "$1" -t 5000 --icon=dialog-error
