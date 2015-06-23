@@ -98,6 +98,16 @@ cumulus_main() {
   display_notification "$img" "$url copied to clipboard" $url $img
 }
 
+print_usage() {
+  echo "usage: $0 [ --open-last | --get-last-url | [ [--skip-screenshot] [--skip-upload] ]"
+  echo ""
+  echo "  -h, --help             Output this usage message and exit."
+  echo "  --get-last-url         Echo the last imgur url and copy it to the clipboard."
+  echo "  --open-last            Open the last image."
+  echo "  --skip-screenshot      Don't take a screenshot, just use the last image. Useful for debugging."
+  echo "  --skip-upload          Don't upload an image, but reuse the last url. Useful for debugging."
+}
+
 ####################
 # Main execution
 ####################
@@ -107,6 +117,10 @@ mkdir -p ~/.cumulus || error "Can't initialize '~/.cumulus directory'"
 
 while [ $# != 0 ]; do
   case "$1" in
+    -h | --help)
+      print_usage
+      exit 0
+      ;;
     --open-last)
       open_last_screenshot
       exit 0
@@ -125,6 +139,11 @@ while [ $# != 0 ]; do
       skip_upload=true
       shift 1
       ;;
+    *)
+      echo "Unknown option $1."
+      echo ""
+      print_usage
+      exit 1;
   esac
 done
 
