@@ -61,7 +61,9 @@ upload_image() {
     JSON=`curl -s -XPOST -H "Authorization: Client-ID $ID" -F "image=@$1" https://api.imgur.com/3/upload`
     echo $JSON > ~/.cumulus/.imgur-response # Store for debugging
   fi
+}
 
+get_last_url() {
   cat ~/.cumulus/.imgur-response | grep -o -P '"http.*?\"' | tr -d '\\"'
 }
 
@@ -80,11 +82,6 @@ open_last_screenshot() {
   fi
 }
 
-get_last_url() {
-  last_url=`cat ~/.cumulus/.last-url`
-  echo $last_url | tee /dev/tty | clipboard
-}
-
 cumulus_main() {
   if ! $skip_screenshot; then
     take_screenshot || error 'Failed to take screenshot'
@@ -92,9 +89,9 @@ cumulus_main() {
 
   # Grab the most recent screenshot in ~/.cumulus
   img=`last_screenshot`
-  url=`upload_image $img`
+  upload_image $img
+  url=`get_last_url`
   echo $url | clipboard
-  echo $url > ~/.cumulus/.last-url
   display_notification "$img" "$url copied to clipboard" $url $img
 }
 
