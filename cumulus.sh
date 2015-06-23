@@ -1,6 +1,12 @@
 #!/bin/bash
 
 ####################
+# Global vars
+####################
+skip_upload=false
+skip_screenshot=false
+
+####################
 # Primitives
 ####################
 
@@ -50,9 +56,46 @@ clipboard() {
 # Upload the specified image path to imgur and print out the path of the image.
 uploadImage() {
   ID=$(cat ~/.cumulusrc | tr -d '\n')
-  JSON=`curl -s -XPOST -H "Authorization: Client-ID $ID" -F "image=@$1" https://api.imgur.com/3/upload`
-  echo $JSON > ~/.cumulus/.imgur-response # Store for debugging
+
+  if ! $skip_upload; then
+    JSON=`curl -s -XPOST -H "Authorization: Client-ID $ID" -F "image=@$1" https://api.imgur.com/3/upload`
+    echo $JSON > ~/.cumulus/.imgur-response # Store for debugging
+  fi
+
   cat ~/.cumulus/.imgur-response | grep -o -P '"http.*?\"' | tr -d '\\"'
+}
+
+lastScreenshot() {
+  ls -t ~/.cumulus/*.png | head -n 1
+}
+
+####################
+# Main functions
+####################
+openLastScreenshot() {
+  if isMac; then
+    open `lastScreenshot`
+  else
+    xdg-open `lastScreenshot`
+  fi
+}
+
+getLastUrl() {
+  last_url=`cat ~/.cumulus/.last-url`
+  echo $last_url | tee /dev/tty | clipboard
+}
+
+doUploadAndCopy() {
+  if ! $skip_screenshot; then
+    takeScreenshot || error 'Failed to take screenshot'
+  fi
+
+  # Grab the most recent screenshot in ~/.cumulus
+  img=`lastScreenshot`
+  url=`uploadImage $img`
+  echo $url | clipboard
+  echo $url > ~/.cumulus/.last-url
+  displayNotification "$img" "$url copied to clipboard" $url $img
 }
 
 ####################
@@ -62,12 +105,29 @@ uploadImage() {
 [ -e "$HOME/.cumulusrc" ] || error "Missing ~/.cumulusrc. Please create one with your imgur client id."
 mkdir -p ~/.cumulus || error "Can't initialize '~/.cumulus directory'"
 
-takeScreenshot || error 'Failed to take screenshot'
+while [ $# != 0 ]; do
+  case "$1" in
+    --open-last)
+      openLastScreenshot
+      exit 0
+      ;;
+    --get-last-url)
+      getLastUrl
+      exit 0
+      ;;
+    --skip-screenshot)
+      # Useful for debugging and for retrying the last screenshot
+      skip_screenshot=true
+      shift 1
+      ;;
+    --skip-upload)
+      # Useful for debugging
+      skip_upload=true
+      shift 1
+      ;;
+  esac
+done
 
-# Grab the most recent screenshot in ~/.cumulus
-img=$(ls -t ~/.cumulus/*.png | head -n 1)
-url=`uploadImage $img`
-echo $url | clipboard
-displayNotification "$img" "$url copied to clipboard" $url $img
+doUploadAndCopy
 
 exit 0
