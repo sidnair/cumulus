@@ -21,10 +21,15 @@ shortcut).
 
 `make install` puts `cumulus` in your path.
 
-# Requirements
-This isn't really designed to be portable, so YMMV.
+Create a `~/.cumulusrc` file which contains an imgur client id.
 
-- ~/.cumulusrc file with an imgur client id
+# Requirements
+
+For Linux:
 - scrot
 - notify-send
 - xsel
+
+
+For OS X:
+- terminal-notifier
