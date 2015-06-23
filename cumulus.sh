@@ -23,6 +23,13 @@ displayNotification() {
   fi
 }
 
+# Display error message an exit
+error() {
+  displayNotification "Cumulus Error" "$1"
+  exit 1
+}
+
+# Take an interactive screenshot and put it in ~/.cumulus
 takeScreenshot() {
   if isMac; then
     screencapture -i ~/.cumulus/screen-$(date +"%m-%d-%Y-%H:%M:%S").png
@@ -31,6 +38,7 @@ takeScreenshot() {
   fi
 }
 
+# Pipe text to this function to copy it to the clipboard
 clipboard() {
   if isMac; then
     pbcopy
@@ -39,6 +47,7 @@ clipboard() {
   fi
 }
 
+# Upload the specified image path to imgur and print out the path of the image.
 uploadImage() {
   ID=$(cat ~/.cumulusrc | tr -d '\n')
   JSON=`curl -s -XPOST -H "Authorization: Client-ID $ID" -F "image=@$1" https://api.imgur.com/3/upload`
@@ -46,20 +55,16 @@ uploadImage() {
   cat ~/.cumulus/.imgur-response | grep -o -P '"http.*?\"' | tr -d '\\"'
 }
 
-error() {
-  displayNotification "Cumulus Error" "$1"
-  exit 1
-}
-
 ####################
 # Main execution
 ####################
 
 [ -e "$HOME/.cumulusrc" ] || error "Missing ~/.cumulusrc. Please create one with your imgur client id."
-
 mkdir -p ~/.cumulus || error "Can't initialize '~/.cumulus directory'"
+
 takeScreenshot || error 'Failed to take screenshot'
 
+# Grab the most recent screenshot in ~/.cumulus
 img=$(ls -t ~/.cumulus/*.png | head -n 1)
 url=`uploadImage $img`
 echo $url | clipboard
