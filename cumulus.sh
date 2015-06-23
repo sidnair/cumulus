@@ -4,7 +4,7 @@
 # Primitives
 ####################
 
-function isMac {
+isMac() {
   uname | grep -q "Darwin"
 }
 
@@ -13,7 +13,7 @@ function isMac {
 # 2) message
 # 3) url to open on click (optional, ignored on Linux)
 # 4) icon url (optional)
-function displayNotification {
+displayNotification() {
   if isMac; then
     terminal-notifier -message $2 -title $1 -open $3 -contentImage $4 -sound Glass
   else
@@ -23,7 +23,7 @@ function displayNotification {
   fi
 }
 
-function takeScreenshot {
+takeScreenshot() {
   if isMac; then
     screencapture -i ~/.cumulus/screen-$(date +"%m-%d-%Y-%H:%M:%S").png
   else
@@ -31,7 +31,7 @@ function takeScreenshot {
   fi
 }
 
-function clipboard {
+clipboard() {
   if isMac; then
     pbcopy
   else
@@ -39,14 +39,14 @@ function clipboard {
   fi
 }
 
-function uploadImage {
+uploadImage() {
   ID=$(cat ~/.cumulusrc | tr -d '\n')
   JSON=`curl -s -XPOST -H "Authorization: Client-ID $ID" -F "image=@$1" https://api.imgur.com/3/upload`
   echo $JSON > ~/.cumulus/.imgur-response # Store for debugging
   cat ~/.cumulus/.imgur-response | grep -o -P '"http.*?\"' | tr -d '\\"'
 }
 
-function error {
+error() {
   displayNotification "Cumulus Error" "$1"
   exit 1
 }
@@ -60,9 +60,9 @@ function error {
 mkdir -p ~/.cumulus || error "Can't initialize '~/.cumulus directory'"
 takeScreenshot || error 'Failed to take screenshot'
 
-IMG=$(ls -t ~/.cumulus/*.png | head -n 1)
-URL=`uploadImage $IMG`
-echo $URL | clipboard
-displayNotification "$IMG" "$URL copied to clipboard" $URL $IMG
+img=$(ls -t ~/.cumulus/*.png | head -n 1)
+url=`uploadImage $img`
+echo $url | clipboard
+displayNotification "$img" "$url copied to clipboard" $url $img
 
 exit 0
