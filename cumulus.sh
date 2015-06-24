@@ -60,8 +60,10 @@ upload_image() {
   ID=$(cat ~/.cumulusrc | tr -d '\n')
 
   if [ "$SKIP_UPLOAD" != true ]; then
-    JSON=`curl -s -XPOST -H "Authorization: Client-ID $ID" -F "image=@$1" https://api.imgur.com/3/upload`
-    echo $JSON > ~/.cumulus/.imgur-response # Store for debugging
+    # Make request and store for debugging. --fail causes it to exit with an
+    # error code
+    curl -s -XPOST -H "Authorization: Client-ID $ID" -F "image=@$1" --fail \
+        https://api.imgur.com/3/upload > ~/.cumulus/.imgur-response || error 'Failed to upload'
   fi
 }
 
