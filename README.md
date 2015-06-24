@@ -20,12 +20,10 @@ shortcut).
 Create a `~/.cumulusrc` file which contains an imgur client id.
 
 # Requirements
-
 For Linux:
 - scrot
 - notify-send
 - xsel
-
 
 For OS X:
 - terminal-notifier
