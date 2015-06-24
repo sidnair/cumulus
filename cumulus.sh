@@ -30,7 +30,7 @@ display_notification() {
 
 # Display error message an exit
 error() {
-  display_notification "Cumulus Error" "$1"
+  display_notification "Cumulus Error" "$1" "" ""
   exit 1
 }
 
