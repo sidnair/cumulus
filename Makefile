@@ -1,4 +1,5 @@
 PREFIX:=/usr/local
 
 install:
-	cp cumulus.sh ${PREFIX}/bin/cumulus
+	ln -s $(realpath cumulus.sh) ${PREFIX}/bin/cumulus
+	chmod +x ${PREFIX}/bin/cumulus
