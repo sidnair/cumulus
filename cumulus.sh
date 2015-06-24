@@ -88,9 +88,9 @@ cumulus_main() {
   fi
 
   # Grab the most recent screenshot in ~/.cumulus
-  img=`last_screenshot`
+  local img=`last_screenshot`
   upload_image $img
-  url=`get_last_url`
+  local url=`get_last_url`
   echo $url | clipboard
   display_notification "$img" "$url copied to clipboard" $url $img
 }
