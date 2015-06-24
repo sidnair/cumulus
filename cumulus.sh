@@ -5,14 +5,12 @@
 ####################
 skip_upload=false
 skip_screenshot=false
+whole_screen=false
+[ "$(uname)" == "Darwin" ] && is_mac=true || is_mac=false
 
 ####################
 # Primitives
 ####################
-
-is_mac() {
-  uname | grep -q "Darwin"
-}
 
 # Display notification. Arguments:
 # 1) title
@@ -20,7 +18,7 @@ is_mac() {
 # 3) url to open on click (optional, ignored on Linux)
 # 4) icon url (optional)
 display_notification() {
-  if is_mac; then
+  if $is_mac; then
     terminal-notifier -message "$2" -title "$1" -open "$3" -contentImage "$4" -sound Glass
   else
     notify-send $1 $2 -t 3000 --icon=$4
@@ -37,16 +35,19 @@ error() {
 
 # Take an interactive screenshot and put it in ~/.cumulus
 take_screenshot() {
-  if is_mac; then
-    screencapture -i ~/.cumulus/screen-$(date +"%m-%d-%Y-%H:%M:%S").png
-  else
-    (cd ~/.cumulus && scrot -s)
-  fi
+  filename=~/.cumulus/screen-$(date +"%m-%d-%Y-%H:%M:%S").png
+
+  case "$is_mac-$whole_screen" in
+    "true-true") screencapture $filename;;
+    "true-false") screencapture -i $filename;;
+    "false-true") scrot $filename;;
+    "false-false") scrot -s $filename;;
+  esac
 }
 
 # Pipe text to this function to copy it to the clipboard
 clipboard() {
-  if is_mac; then
+  if $is_mac; then
     pbcopy
   else
     xsel -i -b
@@ -75,7 +76,7 @@ last_screenshot() {
 # Main functions
 ####################
 open_last_screenshot() {
-  if is_mac; then
+  if $is_mac; then
     open `last_screenshot`
   else
     xdg-open `last_screenshot`
@@ -101,6 +102,7 @@ print_usage() {
   echo "  -h, --help             Output this usage message and exit."
   echo "  --get-last-url         Echo the last imgur url and copy it to the clipboard."
   echo "  --open-last            Open the last image."
+  echo "  --whole-screen          Take a screenshot of the whole screen. Don't prompt for selection."
   echo "  --skip-screenshot      Don't take a screenshot, just use the last image. Useful for debugging."
   echo "  --skip-upload          Don't upload an image, but reuse the last url. Useful for debugging."
 }
@@ -127,13 +129,15 @@ while [ $# != 0 ]; do
       exit 0
       ;;
     --skip-screenshot)
-      # Useful for debugging and for retrying the last screenshot
       skip_screenshot=true
       shift 1
       ;;
     --skip-upload)
-      # Useful for debugging
       skip_upload=true
+      shift 1
+      ;;
+    --whole-screen)
+      whole_screen=true
       shift 1
       ;;
     *)
