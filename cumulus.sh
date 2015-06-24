@@ -4,10 +4,10 @@ set -eu
 ####################
 # Global vars
 ####################
-skip_upload=false
-skip_screenshot=false
-whole_screen=false
-[ "$(uname)" == "Darwin" ] && is_mac=true || is_mac=false
+SKIP_UPLOAD=false
+SKIP_SCREENSHOT=false
+WHOLE_SCREEN=false
+[ "$(uname)" == "Darwin" ] && IS_MAC=true || IS_MAC=false
 
 ####################
 # Primitives
@@ -19,7 +19,7 @@ whole_screen=false
 # 3) url to open on click (optional, ignored on Linux)
 # 4) icon url (optional)
 display_notification() {
-  if $is_mac; then
+  if $IS_MAC; then
     terminal-notifier -message "$2" -title "$1" -open "$3" -contentImage "$4" -sound Glass
   else
     notify-send $1 $2 -t 3000 --icon=$4
@@ -38,7 +38,7 @@ error() {
 take_screenshot() {
   filename=~/.cumulus/screen-$(date +"%m-%d-%Y-%H:%M:%S").png
 
-  case "$is_mac-$whole_screen" in
+  case "$IS_MAC-$WHOLE_SCREEN" in
     "true-true") screencapture $filename;;
     "true-false") screencapture -i $filename;;
     "false-true") scrot $filename;;
@@ -48,7 +48,7 @@ take_screenshot() {
 
 # Pipe text to this function to copy it to the clipboard
 clipboard() {
-  if $is_mac; then
+  if $IS_MAC; then
     pbcopy
   else
     xsel -i -b
@@ -59,7 +59,7 @@ clipboard() {
 upload_image() {
   ID=$(cat ~/.cumulusrc | tr -d '\n')
 
-  if ! $skip_upload; then
+  if ! $SKIP_UPLOAD; then
     JSON=`curl -s -XPOST -H "Authorization: Client-ID $ID" -F "image=@$1" https://api.imgur.com/3/upload`
     echo $JSON > ~/.cumulus/.imgur-response # Store for debugging
   fi
@@ -77,7 +77,7 @@ last_screenshot() {
 # Main functions
 ####################
 open_last_screenshot() {
-  if $is_mac; then
+  if $IS_MAC; then
     open `last_screenshot`
   else
     xdg-open `last_screenshot`
@@ -85,7 +85,7 @@ open_last_screenshot() {
 }
 
 cumulus_main() {
-  if ! $skip_screenshot; then
+  if ! $SKIP_SCREENSHOT; then
     take_screenshot || error 'Failed to take screenshot'
   fi
 
@@ -130,15 +130,15 @@ while [ $# != 0 ]; do
       exit 0
       ;;
     --skip-screenshot)
-      skip_screenshot=true
+      SKIP_SCREENSHOT=true
       shift 1
       ;;
     --skip-upload)
-      skip_upload=true
+      SKIP_UPLOAD=true
       shift 1
       ;;
     --whole-screen)
-      whole_screen=true
+      WHOLE_SCREEN=true
       shift 1
       ;;
     *)
