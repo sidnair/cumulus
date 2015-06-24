@@ -19,7 +19,7 @@ WHOLE_SCREEN=false
 # 3) url to open on click (optional, ignored on Linux)
 # 4) icon url (optional)
 display_notification() {
-  if $IS_MAC; then
+  if [ "$IS_MAC" = true ]; then
     terminal-notifier -message "$2" -title "$1" -open "$3" -contentImage "$4" -sound Glass
   else
     notify-send $1 $2 -t 3000 --icon=$4
@@ -48,7 +48,7 @@ take_screenshot() {
 
 # Pipe text to this function to copy it to the clipboard
 clipboard() {
-  if $IS_MAC; then
+  if [ "$IS_MAC" = true ]; then
     pbcopy
   else
     xsel -i -b
@@ -59,7 +59,7 @@ clipboard() {
 upload_image() {
   ID=$(cat ~/.cumulusrc | tr -d '\n')
 
-  if ! $SKIP_UPLOAD; then
+  if [ "$SKIP_UPLOAD" != true ]; then
     JSON=`curl -s -XPOST -H "Authorization: Client-ID $ID" -F "image=@$1" https://api.imgur.com/3/upload`
     echo $JSON > ~/.cumulus/.imgur-response # Store for debugging
   fi
@@ -77,7 +77,7 @@ last_screenshot() {
 # Main functions
 ####################
 open_last_screenshot() {
-  if $IS_MAC; then
+  if [ "$IS_MAC" = true ]; then
     open `last_screenshot`
   else
     xdg-open `last_screenshot`
@@ -85,7 +85,7 @@ open_last_screenshot() {
 }
 
 cumulus_main() {
-  if ! $SKIP_SCREENSHOT; then
+  if [ "$SKIP_SCREENSHOT" != true ]; then
     take_screenshot || error 'Failed to take screenshot'
   fi
 
